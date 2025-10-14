@@ -1,0 +1,40 @@
+name: examen_final_movil
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # ── Núcleo del examen ─────────────────────────────────────────
+  dio: ^5.5.0                 # HTTP client
+  go_router: ^14.2.0          # Ruteo
+  flutter_riverpod: ^2.5.1    # Estado (opcional pero útil)
+  firebase_core: ^3.0.0       # Firebase base
+  firebase_auth: ^5.0.0       # Login con email/clave
+  flutter_secure_storage: ^9.2.2  # Guardar sesión/token si hiciera falta
+  intl: ^0.19.0               # Fechas/formatos
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+  # ── Utilidades de build (por si las usamos luego) ────────────
+  build_runner: ^2.4.9
+  json_serializable: ^6.9.0
+
+flutter:
+  uses-material-design: true
+  # assets:
+  #   - assets/
+  # fonts:
+  #   - family: MyFont
+  #     fonts:
+  #       - asset: fonts/MyFont-Regular.ttf
