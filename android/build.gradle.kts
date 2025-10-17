@@ -1,3 +1,10 @@
+// android/build.gradle.kts
+
+plugins {
+    // Solo declaramos Google Services aquí; el resto lo gestiona Flutter/Android automáticamente
+    id("com.google.gms.google-services") version "4.4.2" apply false
+}
+
 allprojects {
     repositories {
         google()
@@ -5,6 +12,7 @@ allprojects {
     }
 }
 
+// ======== (Conserva tu configuración de carpetas de build) ========
 val newBuildDir: Directory =
     rootProject.layout.buildDirectory
         .dir("../../build")
@@ -14,8 +22,6 @@ rootProject.layout.buildDirectory.value(newBuildDir)
 subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
-}
-subprojects {
     project.evaluationDependsOn(":app")
 }
 
