@@ -81,7 +81,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             children: const [
               HintBanner(
                 message:
-                    '💡 Toca un producto para editarlo o eliminarlo.\nUsa el botón + para agregar nuevos productos.',
+                    'Toca un producto para editarlo o eliminarlo.\nUsa el botón + para agregar nuevos productos.',
               ),
               SizedBox(height: 12),
               Center(child: Text('No hay productos')),
