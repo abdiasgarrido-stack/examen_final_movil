@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'category_form.dart';
+import '../widgets/ui_helpers.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -63,29 +64,30 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Widget content;
-
-    if (loading) {
-      content = const Center(child: CircularProgressIndicator());
-    } else if (error != null) {
-      content = Center(child: Text(error!));
-    } else if (items.isEmpty) {
-      content = RefreshIndicator(
-        onRefresh: load,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: const [
-            Text(
-              '💡 Toca una categoría para editarla.',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 16),
-            Center(child: Text('No hay categorías')),
-          ],
-        ),
-      );
-    } else {
-      content = RefreshIndicator(
+    final Widget body = () {
+      if (loading) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (error != null) {
+        return Center(child: Text(error!));
+      }
+      if (items.isEmpty) {
+        return RefreshIndicator(
+          onRefresh: load,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: const [
+              HintBanner(
+                message:
+                    '💡 Toca una categoría para editarla o eliminarla.\nUsa el botón + para agregar nuevas categorías.',
+              ),
+              SizedBox(height: 12),
+              Center(child: Text('No hay categorías')),
+            ],
+          ),
+        );
+      }
+      return RefreshIndicator(
         onRefresh: load,
         child: ListView.separated(
           padding: const EdgeInsets.all(8),
@@ -117,11 +119,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           },
         ),
       );
-    }
+    }();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Categorías')),
-      body: content,
+      body: body,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final refresh = await Navigator.push(

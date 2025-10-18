@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'product_form.dart';
+import '../widgets/ui_helpers.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -45,10 +46,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
         ],
       ),
     );
+
     if (confirm != true) return;
 
     final ok = await ApiService.deleteProduct(id);
     if (!mounted) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(ok ? 'Producto eliminado' : 'Error al eliminar')),
     );
@@ -63,31 +66,30 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Widget content;
-
-    if (loading) {
-      content = const Center(child: CircularProgressIndicator());
-    } else if (error != null) {
-      content = Center(child: Text(error!));
-    } else if (items.isEmpty) {
-      content = RefreshIndicator(
-        onRefresh: load,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: const [
-            // Si no tienes este widget, puedes reemplazarlo por un Text.
-            // HintBanner(message: '💡 Toca un producto para editarlo.'),
-            Text(
-              '💡 Toca un producto para editarlo.',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 16),
-            Center(child: Text('No hay productos')),
-          ],
-        ),
-      );
-    } else {
-      content = RefreshIndicator(
+    final Widget body = () {
+      if (loading) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (error != null) {
+        return Center(child: Text(error!));
+      }
+      if (items.isEmpty) {
+        return RefreshIndicator(
+          onRefresh: load,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: const [
+              HintBanner(
+                message:
+                    '💡 Toca un producto para editarlo o eliminarlo.\nUsa el botón + para agregar nuevos productos.',
+              ),
+              SizedBox(height: 12),
+              Center(child: Text('No hay productos')),
+            ],
+          ),
+        );
+      }
+      return RefreshIndicator(
         onRefresh: load,
         child: ListView.separated(
           padding: const EdgeInsets.all(8),
@@ -125,11 +127,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
           },
         ),
       );
-    }
+    }();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Productos')),
-      body: content,
+      body: body,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final refresh = await Navigator.push(

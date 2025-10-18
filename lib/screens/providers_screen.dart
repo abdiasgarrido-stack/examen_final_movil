@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'provider_form.dart';
+import '../widgets/ui_helpers.dart';
 
 class ProvidersScreen extends StatefulWidget {
   const ProvidersScreen({super.key});
@@ -63,29 +64,30 @@ class _ProvidersScreenState extends State<ProvidersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Widget content;
-
-    if (loading) {
-      content = const Center(child: CircularProgressIndicator());
-    } else if (error != null) {
-      content = Center(child: Text(error!));
-    } else if (items.isEmpty) {
-      content = RefreshIndicator(
-        onRefresh: load,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: const [
-            Text(
-              '💡 Toca un proveedor para editarlo.',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 16),
-            Center(child: Text('No hay proveedores')),
-          ],
-        ),
-      );
-    } else {
-      content = RefreshIndicator(
+    final Widget body = () {
+      if (loading) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (error != null) {
+        return Center(child: Text(error!));
+      }
+      if (items.isEmpty) {
+        return RefreshIndicator(
+          onRefresh: load,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: const [
+              HintBanner(
+                message:
+                    '💡 Toca un proveedor para editarlo o eliminarlo.\nUsa el botón + para crear un nuevo proveedor.',
+              ),
+              SizedBox(height: 12),
+              Center(child: Text('No hay proveedores')),
+            ],
+          ),
+        );
+      }
+      return RefreshIndicator(
         onRefresh: load,
         child: ListView.separated(
           padding: const EdgeInsets.all(8),
@@ -118,11 +120,11 @@ class _ProvidersScreenState extends State<ProvidersScreen> {
           },
         ),
       );
-    }
+    }();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Proveedores')),
-      body: content,
+      body: body is ListView ? body : body,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final refresh = await Navigator.push(
