@@ -46,10 +46,12 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         ],
       ),
     );
+
     if (confirm != true) return;
 
     final ok = await ApiService.deleteCategory(id);
     if (!mounted) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(ok ? 'Categoría eliminada' : 'Error al eliminar')),
     );
@@ -64,37 +66,38 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget body = () {
-      if (loading) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      if (error != null) {
-        return Center(child: Text(error!));
-      }
-      if (items.isEmpty) {
-        return RefreshIndicator(
-          onRefresh: load,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: const [
-              HintBanner(
-                message:
-                    '💡 Toca una categoría para editarla o eliminarla.\nUsa el botón + para agregar nuevas categorías.',
-              ),
-              SizedBox(height: 12),
-              Center(child: Text('No hay categorías')),
-            ],
-          ),
-        );
-      }
-      return RefreshIndicator(
+    Widget content;
+
+    if (loading) {
+      content = const Center(child: CircularProgressIndicator());
+    } else if (error != null) {
+      content = Center(child: Text(error!));
+    } else {
+      content = RefreshIndicator(
         onRefresh: load,
         child: ListView.separated(
           padding: const EdgeInsets.all(8),
-          itemCount: items.length,
+          itemCount: (items.isEmpty ? 1 : items.length + 1),
           separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (_, i) {
-            final c = items[i];
+            if (i == 0) {
+              return const Padding(
+                padding: EdgeInsets.fromLTRB(8, 8, 8, 12),
+                child: HintBanner(
+                  message:
+                      '💡 Toca una categoría para editarla o eliminarla.\nUsa el botón + para agregar nuevas categorías.',
+                ),
+              );
+            }
+
+            if (items.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: Text('No hay categorías')),
+              );
+            }
+
+            final c = items[i - 1];
             final id = c['category_id'] ?? 0;
             final name = (c['category_name'] ?? '').toString();
             final state = (c['category_state'] ?? '').toString();
@@ -119,11 +122,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           },
         ),
       );
-    }();
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Categorías')),
-      body: body,
+      body: content,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final refresh = await Navigator.push(

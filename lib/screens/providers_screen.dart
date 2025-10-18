@@ -50,6 +50,7 @@ class _ProvidersScreenState extends State<ProvidersScreen> {
 
     final ok = await ApiService.deleteProvider(id);
     if (!mounted) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(ok ? 'Proveedor eliminado' : 'Error al eliminar')),
     );
@@ -64,37 +65,39 @@ class _ProvidersScreenState extends State<ProvidersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget body = () {
-      if (loading) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      if (error != null) {
-        return Center(child: Text(error!));
-      }
-      if (items.isEmpty) {
-        return RefreshIndicator(
-          onRefresh: load,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: const [
-              HintBanner(
-                message:
-                    '💡 Toca un proveedor para editarlo o eliminarlo.\nUsa el botón + para crear un nuevo proveedor.',
-              ),
-              SizedBox(height: 12),
-              Center(child: Text('No hay proveedores')),
-            ],
-          ),
-        );
-      }
-      return RefreshIndicator(
+    Widget content;
+
+    if (loading) {
+      content = const Center(child: CircularProgressIndicator());
+    } else if (error != null) {
+      content = Center(child: Text(error!));
+    } else {
+      content = RefreshIndicator(
         onRefresh: load,
         child: ListView.separated(
           padding: const EdgeInsets.all(8),
-          itemCount: items.length,
+          itemCount: (items.isEmpty ? 1 : items.length + 1),
           separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (_, i) {
-            final p = items[i];
+            // Encabezado (banner)
+            if (i == 0) {
+              return const Padding(
+                padding: EdgeInsets.fromLTRB(8, 8, 8, 12),
+                child: HintBanner(
+                  message:
+                      '💡 Toca un proveedor para editarlo o eliminarlo.\nUsa el botón + para crear un nuevo proveedor.',
+                ),
+              );
+            }
+
+            if (items.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: Text('No hay proveedores')),
+              );
+            }
+
+            final p = items[i - 1];
             final id = p['provider_id'] ?? 0;
             final name = (p['provider_name'] ?? '').toString();
             final phone = (p['provider_phone'] ?? '').toString();
@@ -120,11 +123,11 @@ class _ProvidersScreenState extends State<ProvidersScreen> {
           },
         ),
       );
-    }();
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Proveedores')),
-      body: body is ListView ? body : body,
+      body: content,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final refresh = await Navigator.push(

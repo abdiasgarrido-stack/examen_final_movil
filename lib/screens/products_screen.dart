@@ -66,37 +66,38 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget body = () {
-      if (loading) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      if (error != null) {
-        return Center(child: Text(error!));
-      }
-      if (items.isEmpty) {
-        return RefreshIndicator(
-          onRefresh: load,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: const [
-              HintBanner(
-                message:
-                    'Toca un producto para editarlo o eliminarlo.\nUsa el botón + para agregar nuevos productos.',
-              ),
-              SizedBox(height: 12),
-              Center(child: Text('No hay productos')),
-            ],
-          ),
-        );
-      }
-      return RefreshIndicator(
+    Widget content;
+
+    if (loading) {
+      content = const Center(child: CircularProgressIndicator());
+    } else if (error != null) {
+      content = Center(child: Text(error!));
+    } else {
+      content = RefreshIndicator(
         onRefresh: load,
         child: ListView.separated(
           padding: const EdgeInsets.all(8),
-          itemCount: items.length,
+          itemCount: (items.isEmpty ? 1 : items.length + 1),
           separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (_, i) {
-            final p = items[i];
+            if (i == 0) {
+              return const Padding(
+                padding: EdgeInsets.fromLTRB(8, 8, 8, 12),
+                child: HintBanner(
+                  message:
+                      '💡 Toca un producto para editarlo o eliminarlo.\nUsa el botón + para agregar nuevos productos.',
+                ),
+              );
+            }
+
+            if (items.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: Text('No hay productos')),
+              );
+            }
+
+            final p = items[i - 1];
             final id = p['product_id'] ?? 0;
             final name = (p['product_name'] ?? '').toString();
             final price = (p['product_price'] ?? '').toString();
@@ -127,11 +128,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
           },
         ),
       );
-    }();
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Productos')),
-      body: body,
+      body: content,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final refresh = await Navigator.push(
